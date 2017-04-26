@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shapes</title>
+    <style>
+        body{
+            background-color: #fafafa
+        }
+        h1, h4{
+            text-align: center;
+        }
+        #wrapper{
+            margin:auto;
+            width: 1060px;
+        }
+        #canvasComponent{
+            float:left;
+            width:800px;
+            background-color: #ffffff;
+        }
+        #controlPanelComponent{
+            float:left;
+            width:220px;
+            height: 584px;
+            background-color: #F0F0F0;
+            padding:10px;
+        }
+        form{
+            margin-bottom:5px;
+        }
+        input{
+            width:30px;
+        }
+        #clear{
+            margin: 10px auto;
+            width:100px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body onload="init()">
+    <h1> Graphics EX1</h1>
+    <h4>Submitted by Maoz Tamir and Yaniv Sapir</h4>
+    <div id="wrapper">
+        <div id="controlPanelComponent">
+            <h4><u>Control Panel</u></h4>
+            <form>
+                <label>Color: </label>
+                <select id="chooseColor">
+                    <option>Black</option>
+                    <option>Red</option>
+                    <option>Green</option>
+                    <option>Blue</option>
+                    <option>Yellow</option>
+                </select>
+            </form>
+            <form>
+                <label>Function: </label>
+                <select id="chooseFunction">
+                    <option value="0"></option>
+                    <option value="1">add pixel</option>
+                    <option value="2">my line</option>
+                    <option value="3">my circle</option>
+                    <option value="4">regular polygon</option>
+                    <option value="5">bezier</option>
+                </select>
+            </form>
+            <label>Input for functions: </label><input id="poly">
+            <div><button id="clear">Clean the board</button></div>
+        </div>
+        <div id="canvasComponent">
+            <canvas id="board"></canvas>
+        </div>
+    </div>
+
+    <script>
+
+        //////////
+        // vars //
+        //////////
+
+        // canvas vars
+        var canvas = document.querySelector('#board');
+        var ctx = canvas.getContext('2d');
+        var canvasWidth = 800;
+        var canvasHeight = 600;
+        // select color var
+        var chooseColor = document.querySelector("#chooseColor");
+        var color;
+        // array to hold the click points
+        var clicks = [];
+        // click point structures
+        var point = {
+            x: 0,
+            y: 0
+        };
+        var secondPoint = JSON.parse(JSON.stringify(point));
+        var thirdPoint  = JSON.parse(JSON.stringify(point));
+        var fourPoint   = JSON.parse(JSON.stringify(point));
+        var fivePoint   = JSON.parse(JSON.stringify(point));
+        // clean button var
+        var clear = document.querySelector("#clear");
+        // choose function form var
+        var chooseFunction = document.querySelector("#chooseFunction");
+        // input var
+        var polyInput = document.querySelector('#poly');
+        var globalN = 6;
+
+        /////////////////////
+        // event listeners //
+        /////////////////////
+
+        clear.addEventListener("click", clean);
+        chooseColor.addEventListener("change",getColor);
+        canvas.addEventListener("click",getClickPosition);
+        chooseFunction.addEventListener("change",checkChosenFunc);
+        polyInput.addEventListener("change",updatePoly);
+
+        ///////////////
+        // functions //
+        ///////////////
+
+        /* initialize */
+        function init(){
+            setCanvasSize();
+            getColor();
+        }
+
+        /* set canvas dimensions */
+        function setCanvasSize() {
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+        }
+
+        /* get selected color */
+        function getColor() {
+            color = color === "" ? "black" : chooseColor.options[chooseColor.selectedIndex].text;
+            //console.log("color changed to "+color);
+        }
+
+        /* reset the canvas */
+        function clean() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            clicks=[];
+            secondPoint.x =0;
+            secondPoint.y =0;
+            thirdPoint.x = 0;
+            thirdPoint.y = 0;
+            fourPoint.x = 0;
+            fourPoint.y = 0;
+            fivePoint.x = 0;
+            fivePoint.y = 0;
+            console.log("clear the canvas and reset global vars");
+        }
+
+        /* update input function */
+        function updatePoly() {
+            globalN = parseFloat(polyInput.value);
+        }
+
+        /* get click position and set point cords */
+        function getClickPosition(e) {
+            //reset click array if more than 4
+            if (clicks.length===4) clicks=[];
+            if (e.pageX || e.pageY) {
+                point.x = e.pageX;
+                point.y = e.pageY;
+            } else {
+                point.x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                point.y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            }
+            point.x -= canvas.offsetLeft;
+            point.y -= canvas.offsetTop;
+            var click = [point.x,point.y];
+            //console.log(click);
+            clicks.push(click);
+            console.log("the array of point clicks: " + clicks);
+            checkChosenFunc();
+        }
+
+        /* add pixel to the screen */
+        function addPixel(x,y) {
+            if (x===0 && y===0) return;
+            if ((y>canvasHeight) || (x>canvasWidth)) return;
+            console.log("print " + x + "," + y);
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, 1, 1);
+        }
+
+        /* print custom line */
+        function myLine(x1,y1,x2,y2) {
+            var temp;
+            //get the higher x value between the points
+            if(x2<x1) {
+                temp=x1;
+                x1=x2;
+                x2=temp;
+                temp=y1;
+                y1=y2;
+                y2=temp;
+            }
+            var slope = (y2-y1)/(x2-x1); //the slope
+            var x = x1; // print start point x
+            var y = y1; // print start point y
+            // print line algoritem
+            while(x<=x2) {
+                if ((slope<=1) && (slope>=-1)) {
+                    y = y1+slope*(x-x1);
+                    addPixel(x,y);
+                    x++;
+                } else if( slope>1 ) {
+                    x=(y-y1+slope*x1)/slope;
+                    addPixel(x,y);
+                    y++;
+                } else if( slope<-1 ) {
+                    x=(y-y1+slope*x1)/slope;
+                    addPixel(x,y);
+                    y--;
+                }
+            }
+        }
+
+        /* create circle using pixel method */
+        function myCircle(x1,y1,x2,y2) {
+            var radius = Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
+            var y = 0;
+            var inCircle = 1-radius;
+            while(y<=radius)	{
+                // 8 areas of calculation
+                addPixel( radius + x1, y + y1);
+                addPixel( y + x1, radius + y1);
+                addPixel(-radius + x1, y + y1);
+                addPixel(-y + x1, radius + y1);
+                addPixel(-radius + x1,-y + y1);
+                addPixel(-y + x1,-radius + y1);
+                addPixel( radius + x1,-y + y1);
+                addPixel( y + x1,-radius + y1);
+                y++;
+                if (inCircle<=0) {
+                    inCircle += 2*y+1;
+                } else {
+                    radius--;
+                    inCircle += 2*(y-radius)+1;
+                }
+            }
+        }
+
+        /* create regular polygon using line method */
+        function myRegularPolygon(x1,y1,x2,y2,n) {
+            if (n<3) {
+                alert("polygon value must be greater than 2");
+                return;
+            }
+            var x = [];
+            var y = [];
+            var centre = [x2,y2];
+            var radius = Math.sqrt(Math.pow((x2-x1),2) + Math.pow((y2-y1),2));
+            var theta = 2*Math.PI/n;
+            for (var i = -1; i <= n; i++) {
+                x[i] = radius * Math.cos(2*Math.PI*i/n + theta) + centre[0];
+                y[i] = radius * Math.sin(2*Math.PI*i/n + theta) + centre[1];
+                var a = x[i-1];
+                var b = y[i-1];
+                console.log(a,b,x[i],y[i]);
+                myLine(a,b,x[i],y[i]);
+            }
+        }
+
+        /* create bezier curve using 4 points and 0<t<1 */
+        function bezier(x1, y1, x2, y2, x3, y3, x4, y4, t) {
+            if ((t>1) || (t<0)) return;
+            var temp = 0;
+            var xOne = Math.pow((1-temp),3)*x1+3*(Math.pow((1-temp),2))*temp*x2+3*(1-temp)*Math.pow(temp,2)*x3+Math.pow(temp,3)*x4;
+            var yOne = Math.pow((1-temp),3)*y1+3*(Math.pow((1-temp),2))*temp*y2+3*(1-temp)*Math.pow(temp,2)*y3+Math.pow(temp,3)*y4;
+            while(temp<1) {
+                temp = temp+t;
+                var xTwo = Math.pow((1-temp),3)*x1+3*(Math.pow((1-temp),2))*temp*x2+3*(1-temp)*Math.pow(temp,2)*x3+Math.pow(temp,3)*x4;
+                var yTwo = Math.pow((1-temp),3)*y1+3*(Math.pow((1-temp),2))*temp*y2+3*(1-temp)*Math.pow(temp,2)*y3+Math.pow(temp,3)*y4;
+                myLine(xOne, yOne, xTwo, yTwo);
+                xOne = xTwo;
+                yOne = yTwo;
+            }
+        }
+
+        /* get 2 points from clicks array and set them to draw a line */
+        function setTwoPoints() {
+            if (clicks.length === 2) {
+                var tempA = clicks.pop();
+                var tempB = clicks.pop();
+                secondPoint.y = tempA[1];
+                secondPoint.x = tempA[0];
+                //console.log(clicks);
+                thirdPoint.y = tempB[1];
+                thirdPoint.x = tempB[0];
+                //console.log(thirdPoint.x,thirdPoint.y,secondPoint.x,secondPoint.y);
+            }
+        }
+
+        /* get 4 points from clicks array and set them to draw a line */
+        function setFourPoints() {
+            if (clicks.length === 4) {
+                var tempA = clicks.pop();
+                var tempB = clicks.pop();
+                var tempC = clicks.pop();
+                var tempD = clicks.pop();
+                secondPoint.y = tempA[1];
+                secondPoint.x = tempA[0];
+                thirdPoint.y = tempB[1];
+                thirdPoint.x = tempB[0];
+                fourPoint.y = tempC[1];
+                fourPoint.x = tempC[0];
+                fivePoint.y = tempD[1];
+                fivePoint.x = tempD[0];
+                //console.log(clicks);
+            }
+        }
+
+        /* check chosen function */
+        function checkChosenFunc() {
+            var func = chooseFunction.options[chooseFunction.selectedIndex].value;
+            console.log("function number " + func);
+            switch(func) {
+                case "0":
+                    console.log("please choose a function");
+                    break;
+                case "1":
+                    addPixel(point.x,point.y);
+                    break;
+                case "2":
+                    setTwoPoints();
+                    if ((secondPoint.x !== 0)&&(secondPoint.y !== 0)&&(thirdPoint.x !== 0)&&(thirdPoint.y !== 0))
+                        myLine(thirdPoint.x,thirdPoint.y,secondPoint.x,secondPoint.y);
+                    break;
+                case "3":
+                    setTwoPoints();
+                    if ((secondPoint.x !== 0)&&(secondPoint.y !== 0)&&(thirdPoint.x !== 0)&&(thirdPoint.y !== 0))
+                        myCircle(thirdPoint.x,thirdPoint.y,secondPoint.x,secondPoint.y);
+                    break;
+                case "4":
+                    setTwoPoints();
+                    if ((secondPoint.x !== 0)&&(secondPoint.y !== 0)&&(thirdPoint.x !== 0)&&(thirdPoint.y !== 0))
+                        myRegularPolygon(thirdPoint.x,thirdPoint.y,secondPoint.x,secondPoint.y,globalN);
+                    break;
+                case "5":
+                    setFourPoints();
+                    if ((secondPoint.x !== 0)&&(secondPoint.y !== 0)&&(thirdPoint.x !== 0)&&(thirdPoint.y !== 0)&&
+                        (fourPoint.x !== 0)&&(fourPoint.y !== 0)&&(fivePoint.x !== 0)&&(fivePoint.y !== 0))
+                            bezier(thirdPoint.x,thirdPoint.y,secondPoint.x,secondPoint.y,
+                                fourPoint.x,fourPoint.y,fivePoint.x,fivePoint.y,globalN);
+                    break;
+            }
+        }
+
+    </script>
+</body>
+</html>
