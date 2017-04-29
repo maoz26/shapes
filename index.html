@@ -3,51 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Shapes</title>
-    <style>
-        body{
-            background-color: #fafafa
-        }
-        h1, h4{
-            text-align: center;
-        }
-        #wrapper{
-            margin:auto;
-            width: 1060px;
-        }
-        #canvasComponent{
-            float:left;
-            width:800px;
-            background-color: #ffffff;
-        }
-        #controlPanelComponent{
-            float:left;
-            width:220px;
-            height: 584px;
-            background-color: #F0F0F0;
-            padding:10px;
-        }
-        form{
-            margin-bottom:5px;
-        }
-        input{
-            width:30px;
-        }
-        #clear{
-            margin: 10px auto;
-            width:100px;
-            display: block;
-        }
-    </style>
+    <link rel="stylesheet" href="includes/style.css">
 </head>
 
 <body onload="init()">
-    <h1> Graphics EX1</h1>
+    <h1>Graphics EX2</h1>
     <h4>Submitted by Maoz Tamir and Yaniv Sapir</h4>
     <div id="wrapper">
         <div id="controlPanelComponent">
-            <h4><u>Control Panel</u></h4>
-            <form>
-                <label>Color: </label>
+            <h3><u>Control Panel</u></h3>
+            <form><p><u>EX1</u></p><label>Color:
                 <select id="chooseColor">
                     <option>Black</option>
                     <option>Red</option>
@@ -55,9 +20,8 @@
                     <option>Blue</option>
                     <option>Yellow</option>
                 </select>
-            </form>
-            <form>
-                <label>Function: </label>
+            </label></form>
+            <form><label>Function:
                 <select id="chooseFunction">
                     <option value="0"></option>
                     <option value="1">add pixel</option>
@@ -66,21 +30,36 @@
                     <option value="4">regular polygon</option>
                     <option value="5">bezier</option>
                 </select>
-            </form>
-            <label>Input for functions: </label><input id="poly">
+            </label></form>
+            <label>Input for functions: <input id="poly"></label><br><br>
+            <div id="packageDiv"><p><u>EX2</u></p><button id="packageButton">Load Package</button></div>
             <div><button id="clear">Clean the board</button></div>
         </div>
         <div id="canvasComponent">
             <canvas id="board"></canvas>
         </div>
     </div>
+    <div id="light" class="white_content">
+        <a href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';
+        document.getElementById('fade').style.display='none'" class="textRight">Close</a>
+        <h3><u>functions guide</u></h3>
+        <p><b>First load the picture</b></p>
+        <p>1. For moving the picture, press anywhere on the screen.</p>
+        <p>2. For zooming the picture, press anywhere and it will zoom according to the clicked position.
+        The default degree is 20, if you would like to change it you can insert an input</p>
+        <p>3. For rotating the picture, press anywhere and it will zoom according to the clicked position.</p>
+        <p>4. For mirroring the picture, press anywhere on the screen and it will be mirrored and moved depended
+            on the difference between the initial point and the clicked position</p>
+        <p>5. For shearing the picture, click and drag left/right. the picture will be sheared on the x axis</p>
+    </div>
+    <div id="fade" class="black_overlay"></div>
 
     <script>
-
         //////////
         // vars //
         //////////
 
+        /* EX1 vars */
         // canvas vars
         var canvas = document.querySelector('#board');
         var ctx = canvas.getContext('2d');
@@ -108,20 +87,45 @@
         var polyInput = document.querySelector('#poly');
         var globalN = 6;
 
+        /* EX2 vars */
+        // package loader button
+        var packageButton = document.querySelector("#packageButton");
+        // check if menu already exist
+        var isPicMenuExist= false;
+        //arrays that hold the picture's shape kinds
+        var picture = [];
+        var circlesInPic = [];
+        var linesInPic = [];
+        var bezierInPic = [];
+        //initial ship points
+        var initialShipPointX=418;
+        var initialShipPointY=266;
+        //rotate default degree
+        var globalDegree = 20;
+        //shearing vars
+        var mouseDownX = 0;
+        var mouseDownY = 0;
+        var mouseUpX = 0;
+
         /////////////////////
         // event listeners //
         /////////////////////
 
+        /* EX1 listeners */
         clear.addEventListener("click", clean);
         chooseColor.addEventListener("change",getColor);
         canvas.addEventListener("click",getClickPosition);
         chooseFunction.addEventListener("change",checkChosenFunc);
         polyInput.addEventListener("change",updatePoly);
 
+        /* EX2 listeners */
+        packageButton.addEventListener("click",loadPackage);
+
         ///////////////
         // functions //
         ///////////////
 
+        /* EX1 functions */
         /* initialize */
         function init(){
             setCanvasSize();
@@ -160,10 +164,8 @@
             globalN = parseFloat(polyInput.value);
         }
 
-        /* get click position and set point cords */
-        function getClickPosition(e) {
-            //reset click array if more than 4
-            if (clicks.length===4) clicks=[];
+        /* set point from the event */
+        function getRelativePoint(e) {
             if (e.pageX || e.pageY) {
                 point.x = e.pageX;
                 point.y = e.pageY;
@@ -173,18 +175,25 @@
             }
             point.x -= canvas.offsetLeft;
             point.y -= canvas.offsetTop;
+        }
+
+        /* get click position and set point cords */
+        function getClickPosition(e) {
+            //reset click array if more than 4
+            if (clicks.length===4) clicks=[];
+            getRelativePoint(e);
             var click = [point.x,point.y];
             //console.log(click);
             clicks.push(click);
             console.log("the array of point clicks: " + clicks);
-            checkChosenFunc();
+            isPicMenuExist === false ? checkChosenFunc() : checkChosenFuncPic();
         }
 
         /* add pixel to the screen */
         function addPixel(x,y) {
             if (x===0 && y===0) return;
             if ((y>canvasHeight) || (x>canvasWidth)) return;
-            console.log("print " + x + "," + y);
+            //console.log("print " + x + "," + y);
             ctx.fillStyle = color;
             ctx.fillRect(x, y, 1, 1);
         }
@@ -320,7 +329,7 @@
         /* check chosen function */
         function checkChosenFunc() {
             var func = chooseFunction.options[chooseFunction.selectedIndex].value;
-            console.log("function number " + func);
+            //console.log("function number " + func);
             switch(func) {
                 case "0":
                     console.log("please choose a function");
@@ -353,6 +362,359 @@
             }
         }
 
+        /* EX2 functions */
+        /* load everything related to the ship package */
+        function loadPackage(){
+            createPicOptionMenu(); //load the package
+            loadUserManual(); //load guide to use the functions
+        }
+
+        /* dynamic create the ship picture menu, and only single time */
+        function createPicOptionMenu(){
+            //console.log("loaded menu");
+            if (!isPicMenuExist) {
+                var packageDiv = document.getElementById("packageDiv");
+                //Create array of options to be added
+                var array = ["","Load File","Move Picture","Center Picture","Zoom In","Zoom Out",
+                    "Rotate Right","Rotate Left","Mirror xAxis","Mirror yAxis","Shearing X"];
+
+                //Create and append select list
+                var selectList = document.createElement("select");
+                selectList.id = "shipOptions";
+                packageDiv.appendChild(selectList);
+
+                //Create and append the options
+                for (var i = 0; i < array.length; i++) {
+                    var option = document.createElement("option");
+                    option.value = i;
+                    option.text = array[i];
+                    selectList.appendChild(option);
+                }
+
+                //Create input for ship rotations
+                var shipLabel = document.createElement("label");
+                var inputArea = document.createElement("input");
+                shipLabel.innerHTML="Input for functions: ";
+                inputArea.id = "shipInput";
+                packageDiv.appendChild(shipLabel);
+                shipLabel.appendChild(inputArea);
+
+                isPicMenuExist=true;
+                //after creating the menu, adding an event listener for the option list
+                selectList.addEventListener("change",checkChosenFuncPic);
+                //create event listener for ship input
+                var shipInput = document.querySelector('#shipInput');
+                shipInput.addEventListener("change",updateShipInput);
+            }
+        }
+
+        /* will load guide about how to use the package */
+        function loadUserManual(){
+            console.log("load the guide");
+            document.getElementById('light').style.display='block';
+            document.getElementById('fade').style.display='block'
+        }
+
+        /* ajax call to load json file */
+        function fetchJSONFile(path, callback) {
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function() {
+                if (httpRequest.readyState === 4) {
+                    if (httpRequest.status === 200) {
+                        var data = JSON.parse(httpRequest.responseText);
+                        if (callback) callback(data);
+                    }
+                }
+            };
+            httpRequest.open('GET', path);
+            httpRequest.send();
+        }
+
+        /* print the vector picture to the screen */
+        function drawPic () {
+            var shapeCounter = 0;
+            while(shapeCounter<picture[0].length) {
+                myCircle(picture[0][shapeCounter][0],picture[0][shapeCounter][1],picture[0][shapeCounter][2],picture[0][shapeCounter][3]);
+                shapeCounter++;
+            }
+            shapeCounter=0;
+            while(shapeCounter<picture[1].length) {
+                myLine(picture[1][shapeCounter][0],picture[1][shapeCounter][1],picture[1][shapeCounter][2],picture[1][shapeCounter][3]);
+                shapeCounter++;
+            }
+            shapeCounter=0;
+            while(shapeCounter<picture[2].length) {
+                bezier(picture[2][shapeCounter][0],picture[2][shapeCounter][1],picture[2][shapeCounter][2],picture[2][shapeCounter][3],picture[2][shapeCounter][4],
+                    picture[2][shapeCounter][5],picture[2][shapeCounter][6],picture[2][shapeCounter][7],picture[2][shapeCounter][8]);
+                shapeCounter++;
+            }
+        }
+
+        /* load json file and split it into arrays of shapes[circles,lines,beziers] */
+        function loadAndSplit(){
+            fetchJSONFile('includes/ship.json',function (data) {
+                console.log(data);
+                if (data.circle !== undefined) {
+                    // get circles
+                    for(var row=0; row<data.circle.length; row++) {
+                        circlesInPic[row] = [];
+                        circlesInPic[row][0] = data.circle[row].x1;
+                        circlesInPic[row][1] = data.circle[row].y1;
+                        circlesInPic[row][2] = data.circle[row].x2;
+                        circlesInPic[row][3] = data.circle[row].y2;
+                    }
+                }
+                if (data.line !== undefined) {
+                    //get lines
+                    for(row=0;row<data.line.length;row++) {
+                        linesInPic[row] = [];
+                        linesInPic[row][0] = data.line[row].x1;
+                        linesInPic[row][1] = data.line[row].y1;
+                        linesInPic[row][2] = data.line[row].x2;
+                        linesInPic[row][3] = data.line[row].y2;
+                    }
+                }
+                if (data.curve !== undefined) {
+                    /// get curves
+                    for(row=0;row<data.curve.length;row++) {
+                        bezierInPic[row] = [];
+                        bezierInPic[row][0] = data.curve[row].x1;
+                        bezierInPic[row][1] = data.curve[row].y1;
+                        bezierInPic[row][2] = data.curve[row].x2;
+                        bezierInPic[row][3] = data.curve[row].y2;
+                        bezierInPic[row][4] = data.curve[row].x3;
+                        bezierInPic[row][5] = data.curve[row].y3;
+                        bezierInPic[row][6] = data.curve[row].x4;
+                        bezierInPic[row][7] = data.curve[row].y4;
+                        bezierInPic[row][8] = data.curve[row].t;
+                    }
+                }
+                picture[0] = circlesInPic; //will hold the circles inside the shape
+                picture[1] = linesInPic;    //will hold the lines inside the shape
+                picture[2] = bezierInPic;   //will hold the bezier inside the shape
+                drawPic();
+            });
+        }
+
+        /*  move picture to different location */
+        function movePic(newX, newY) {
+            //clear canvas
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            //calculate the x and y position difference between the initial point and the click
+            const deferenceX= initialShipPointX-newX;
+            const deferenceY= initialShipPointY-newY;
+            //console.log("the difference is: "+deferenceX+","+deferenceY);
+            for (var j=0;j<3;j++){  //loop over shapes kind array
+                for (var i=0;i<picture[j].length;i++) { //loop over the rows of each shape array
+                    var t;
+                    if (j===2) { // if the shape is bezier, avoid touching the "t" parameter
+                        for (t = 0; t < picture[j][i].length-1; t++) {
+                            t % 2 === 0 ? picture[j][i][t] -= deferenceX : picture[j][i][t] -= deferenceY;
+                        }
+                    } else{
+                        for (t = 0; t < picture[j][i].length; t++) {
+                            t % 2 === 0 ? picture[j][i][t] -= deferenceX : picture[j][i][t] -= deferenceY;
+                        }
+                    }
+                }
+            }
+            drawPic();
+            initialShipPointX=newX;
+            initialShipPointY=newY;
+            //console.log("new point "+initialShipPointX+","+initialShipPointY);
+        }
+
+        /*  zoom in/out depends on a click location */
+        function zoomPic(zoomX, zoomY,zoomIndex ) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            const deferenceX= initialShipPointX-zoomX;
+            const deferenceY= initialShipPointY-zoomY;
+
+            for (var j=0;j<3;j++){  //loop over shapes kind array
+                for (var i=0;i<picture[j].length;i++) { //loop over the rows of each shape array
+                    var t;
+                    if (j===2) { // if the shape is bezier, avoid touching the "t" parameter
+                        for (t = 0; t < picture[j][i].length-1; t++) {
+                            if(t % 2 === 0){
+                                picture[j][i][t] = initialShipPointX+ ((picture[j][i][t] -initialShipPointX)*zoomIndex)+ deferenceX * zoomIndex;
+                            }else{
+                                picture[j][i][t] = initialShipPointY+ ((picture[j][i][t] -initialShipPointY)*zoomIndex)+ deferenceY * zoomIndex;
+                            }
+                        }
+                    } else{
+                        for (t = 0; t < picture[j][i].length; t++) {
+                            if(t % 2 === 0){
+                                picture[j][i][t] = initialShipPointX+ ((picture[j][i][t] -initialShipPointX)*zoomIndex)+ deferenceX * zoomIndex;
+                            }else{
+                                picture[j][i][t] = initialShipPointY+ ((picture[j][i][t] -initialShipPointY)*zoomIndex)+ deferenceY * zoomIndex;
+                            }
+                        }
+                    }
+                }
+            }
+            drawPic();
+            initialShipPointX=zoomX;
+            initialShipPointY=zoomY;
+        }
+
+        /*  center the picture */
+        function centerPic(){
+            point.x=canvasWidth/2;
+            point.y=canvasHeight/2;
+            movePic(point.x,point.y);
+        }
+
+        /*  update the rotation value */
+        function updateShipInput() {
+            globalDegree = shipInput.value;
+        }
+
+        /* calculation algoritem function for rotation */
+        function calculationForRotate(x,y,rotateRad,j,i,t){
+            var radius = Math.sqrt(Math.pow((picture[j][i][t]-x),2)+Math.pow((picture[j][i][t+1]-y),2));
+            var current = picture[j][i][t];
+            if((picture[j][i][t+1]-y)<0) {
+                picture[j][i][t] = radius*(Math.cos(rotateRad-(Math.acos((Math.pow((picture[j][i][t]-x),2)
+                            +Math.pow(radius,2)-Math.pow((picture[j][i][t+1]-y),2))/(2*(picture[j][i][t]-x)*radius)))))+x;
+                picture[j][i][t+1] = radius*(Math.sin(rotateRad-(Math.acos((Math.pow((current-x),2)
+                            +Math.pow(radius,2)-Math.pow((picture[j][i][t+1]-y),2))/(2*(current-x)*radius)))))+y;
+            } else {
+                picture[j][i][t] = radius*(Math.cos(rotateRad+(Math.acos((Math.pow((picture[j][i][t]-x),2)
+                            +Math.pow(radius,2)-Math.pow((picture[j][i][t+1]-y),2))/(2*(picture[j][i][t]-x)*radius)))))+x;
+                picture[j][i][t+1] = radius*(Math.sin(rotateRad+(Math.acos((Math.pow((current-x),2)
+                            +Math.pow(radius,2)-Math.pow((picture[j][i][t+1]-y),2))/(2*(current-x)*radius)))))+y;
+            }
+        }
+
+        /*  rotate the picture */
+        function rotatePic(x, y , degree) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            var rotateRad = (degree*Math.PI)/180;
+
+            for (var j=0;j<3;j++){  //loop over shapes kind array
+                for (var i=0;i<picture[j].length;i++) { //loop over the rows of each shape array
+                    var t;
+                    if (j===2) { // if the shape is bezier, avoid touching the "t" parameter
+                        for (t = 0; t < picture[j][i].length-1; t+=2) {
+                            calculationForRotate(x,y,rotateRad,j,i,t);
+                        }
+                    } else{
+                        for (t = 0; t < picture[j][i].length; t+=2) {
+                            calculationForRotate(x,y,rotateRad,j,i,t);
+                        }
+                    }
+                }
+            }
+            drawPic();
+        }
+
+        /*  mirror the picture */
+        function mirrorPic(x,y,axis) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            var axisToChange = axis === 0 ? 0 : 1;  //if axis===0 mirror x, else mirror y
+            var axisValue = axis === 0 ? x : y;     //if axis===0 mirror x, else mirror y
+            for (var j=0;j<3;j++){  //loop over shapes kind array
+                for (var i=0;i<picture[j].length;i++) { //loop over the rows of each shape array
+                    var t = axisToChange;
+                    if (j===2) { // if the shape is bezier, avoid touching the "t" parameter
+                        for (t ; t < picture[j][i].length-1; t+=2) {
+                            picture[j][i][t]=picture[j][i][t]-(picture[j][i][t]-axisValue)*2;
+                        }
+                    } else{
+                        for (t; t < picture[j][i].length; t+=2) {
+                            picture[j][i][t]=picture[j][i][t]-(picture[j][i][t]-axisValue)*2;
+                        }
+                    }
+                }
+            }
+            drawPic();
+        }
+
+        /*  shearing function, relative to the button of the ship */
+        function shearingPic (holdClickX, releaseClickX, holdClickY) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            var shearPoint = 416; // bottom of the ship, shearing will be relative to this position
+            var ShearingIndex = (holdClickX-releaseClickX)/(shearPoint-holdClickY);
+
+            for (var j=0;j<3;j++){  //loop over shapes kind array
+                for (var i=0;i<picture[j].length;i++) { //loop over the rows of each shape array
+                    var t;
+                    if (j===2) { // if the shape is bezier, avoid touching the "t" parameter
+                        for (t=0; t < picture[j][i].length-1; t+=2) {
+                            picture[j][i][t] = picture[j][i][t]+(ShearingIndex*(picture[j][i][t+1]-shearPoint))
+                        }
+                    } else{
+                        for (t=0; t < picture[j][i].length; t+=2) {
+                            picture[j][i][t] = picture[j][i][t]+(ShearingIndex*(picture[j][i][t+1]-shearPoint))
+                        }
+                    }
+                }
+            }
+            drawPic();
+            canvas.removeEventListener("mousedown",mouseDown);
+            canvas.removeEventListener("mouseup",mouseUp);
+        }
+
+        /*  set point for mouse down */
+        function mouseDown(e){
+            getRelativePoint(e);
+            mouseDownX = point.x;
+            mouseDownY = point.y;
+        }
+
+        /*  set point for mouse up */
+        function mouseUp(e){
+            getRelativePoint(e);
+            mouseUpX = point.x;
+            shearingPic(mouseDownX,mouseUpX,mouseDownY);
+        }
+
+        /*  ship json file transformation functions */
+        function checkChosenFuncPic(){
+            var func2 = shipOptions.options[shipOptions.selectedIndex].value;
+            //console.log("function: " + func2);
+            switch(func2) {
+                case "0":
+                    console.log("please choose a function");
+                    break;
+                case "1":
+                    loadAndSplit();
+                    break;
+                case "2":
+                    point.x===0 && point.y===0 ? alert("Select point to move the object into") : movePic(point.x,point.y);
+                    break;
+                case "3":
+                    centerPic();
+                    break;
+                case "4":
+                    point.x===0 && point.y===0 ? alert("Select the zoom point") : zoomPic(point.x,point.y,1.05);
+                    break;
+                case "5":
+                    point.x===0 && point.y===0 ? alert("Select the zoom point") : zoomPic(point.x,point.y,0.95);
+                    break;
+                case "6":
+                    point.x===0 && point.y===0 ? alert("Select rotate left point") : rotatePic(point.x,point.y,globalDegree);
+                    break;
+                case "7":
+                    point.x===0 && point.y===0 ? alert("Select rotate right point") : rotatePic(point.x,point.y,-1*globalDegree);
+                    break;
+                case "8":
+                    point.x===0 && point.y===0 ? alert("Select Mirror x axis") : mirrorPic(point.x,point.y,0);
+                    break;
+                case "9":
+                    point.x===0 && point.y===0 ? alert("Select Mirror y axis") : mirrorPic(point.x,point.y,1);
+                    break;
+                case "10":
+                    canvas.addEventListener("mousedown",mouseDown);
+                    canvas.addEventListener("mouseup",mouseUp);
+                    break;
+            }
+        }
     </script>
 </body>
 </html>
