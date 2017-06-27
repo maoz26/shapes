@@ -7,12 +7,13 @@
 </head>
 
 <body onload="init()">
-    <h1>Graphics EX2</h1>
+    <h1>Graphics Final Project</h1>
     <h4>Submitted by Maoz Tamir and Yaniv Sapir</h4>
     <div id="wrapper">
         <div id="controlPanelComponent">
             <h3><u>Control Panel</u></h3>
-            <form><p><u>EX1</u></p><label>Color:
+            <p><u>EX1</u></p>
+            <label>Color:
                 <select id="chooseColor">
                     <option>Black</option>
                     <option>Red</option>
@@ -20,7 +21,7 @@
                     <option>Blue</option>
                     <option>Yellow</option>
                 </select>
-            </label></form>
+            </label>
             <form><label>Function:
                 <select id="chooseFunction">
                     <option value="0"></option>
@@ -32,7 +33,14 @@
                 </select>
             </label></form>
             <label>Input for functions: <input id="poly"></label><br><br>
-            <div id="packageDiv"><p><u>EX2</u></p><button id="packageButton">Load Package</button></div>
+            <div id="packageDiv">
+                <p><u>EX2</u></p>
+                <button id="packageButton">Load Package</button>
+            </div><br>
+            <div id="threeDeeDiv">
+                <p><u>EX3</u></p>
+                <button id="threeDeeButton">Load Package</button>
+            </div><br>
             <div><button id="clear">Clean the board</button></div>
         </div>
         <div id="canvasComponent">
@@ -42,7 +50,7 @@
     <div id="light" class="white_content">
         <a href="javascript:void(0)" onclick="document.getElementById('light').style.display='none';
         document.getElementById('fade').style.display='none'" class="textRight">Close</a>
-        <h3><u>functions guide</u></h3>
+        <h3><u>Functions Guide Ex2</u></h3>
         <p><b>First load the picture</b></p>
         <p>1. For moving the picture, press anywhere on the screen.</p>
         <p>2. For zooming the picture, press anywhere and it will zoom according to the clicked position.
@@ -52,13 +60,14 @@
             on the difference between the initial point and the clicked position</p>
         <p>5. For shearing the picture, click and drag left/right. the picture will be sheared on the x axis</p>
     </div>
+    <div id="light2" class="white_content">
+        <a href="javascript:void(0)" onclick="document.getElementById('light2').style.display='none';
+        document.getElementById('fade').style.display='none'" class="textRight">Close</a>
+        <h3><u>Functions Guide Ex3</u></h3>
+    </div>
     <div id="fade" class="black_overlay"></div>
 
     <script>
-        //////////
-        // vars //
-        //////////
-
         /* EX1 vars */
         // canvas vars
         var canvas = document.querySelector('#board');
@@ -87,43 +96,12 @@
         var polyInput = document.querySelector('#poly');
         var globalN = 6;
 
-        /* EX2 vars */
-        // package loader button
-        var packageButton = document.querySelector("#packageButton");
-        // check if menu already exist
-        var isPicMenuExist= false;
-        //arrays that hold the picture's shape kinds
-        var picture = [];
-        var circlesInPic = [];
-        var linesInPic = [];
-        var bezierInPic = [];
-        //initial ship points
-        var initialShipPointX=418;
-        var initialShipPointY=266;
-        //rotate default degree
-        var globalDegree = 20;
-        //shearing vars
-        var mouseDownX = 0;
-        var mouseDownY = 0;
-        var mouseUpX = 0;
-
-        /////////////////////
-        // event listeners //
-        /////////////////////
-
         /* EX1 listeners */
         clear.addEventListener("click", clean);
         chooseColor.addEventListener("change",getColor);
         canvas.addEventListener("click",getClickPosition);
         chooseFunction.addEventListener("change",checkChosenFunc);
         polyInput.addEventListener("change",updatePoly);
-
-        /* EX2 listeners */
-        packageButton.addEventListener("click",loadPackage);
-
-        ///////////////
-        // functions //
-        ///////////////
 
         /* EX1 functions */
         /* initialize */
@@ -362,6 +340,29 @@
             }
         }
 
+        /* EX2 vars */
+        // package loader button
+        var packageButton = document.querySelector("#packageButton");
+        // check if menu already exist
+        var isPicMenuExist= false;
+        //arrays that hold the picture's shape kinds
+        var picture = [];
+        var circlesInPic = [];
+        var linesInPic = [];
+        var bezierInPic = [];
+        //initial ship points
+        var initialShipPointX=418;
+        var initialShipPointY=266;
+        //rotate default degree
+        var globalDegree = 20;
+        //shearing vars
+        var mouseDownX = 0;
+        var mouseDownY = 0;
+        var mouseUpX = 0;
+
+        /* EX2 listeners */
+        packageButton.addEventListener("click",loadPackage);
+
         /* EX2 functions */
         /* load everything related to the ship package */
         function loadPackage(){
@@ -412,7 +413,7 @@
         function loadUserManual(){
             console.log("load the guide");
             document.getElementById('light').style.display='block';
-            document.getElementById('fade').style.display='block'
+            document.getElementById('fade').style.display='block';
         }
 
         /* ajax call to load json file */
@@ -715,6 +716,600 @@
                     break;
             }
         }
+
+        /* EX3 vars */
+        // package loader button
+        var threeDeeButton = document.querySelector("#threeDeeButton");
+        var isThreeDeeMenuExist= false;
+        var threeDeePic = [];
+        var polyArr = [];
+        var sortZArr = [];
+        var opacity = 1;
+        var cavalierAndCabinetDeg;
+        var projectionNum = 0;
+        var threeDeeInputX = 0;
+        var threeDeeInputY = 0;
+        var threeDeeInputZ = 0;
+
+        /* EX3 listeners */
+        threeDeeButton.addEventListener("click",loadThreeDeePackage);
+
+        /* EX3 functions */
+        /* load all the things that required for the 3D package */
+        function loadThreeDeePackage(){
+            loadThreeDeeManual();
+            createThreeDeeOptionMenu();
+            loadThreeDee();
+        }
+
+        /*load 3D exercise manual*/
+        function loadThreeDeeManual(){
+            console.log("loaded ThreeDee Manual");
+            document.getElementById('light2').style.display='block';
+            document.getElementById('fade').style.display='block';
+        }
+
+        /* dynamic create the 3D package menu, and only single time */
+        function createThreeDeeOptionMenu(){
+            if (!isThreeDeeMenuExist) {
+                var threeDeeDiv = document.getElementById("threeDeeDiv");
+                //Create array of options to be added
+                var array = ["","perspective","parallel","cabinet","cavalier"];
+
+                //Create and append select list
+                var selectList = document.createElement("select");
+                selectList.id = "threeDeeOptions";
+                threeDeeDiv.appendChild(selectList);
+
+                //Create and append the options
+                for (var i = 0; i < array.length; i++) {
+                    var option = document.createElement("option");
+                    option.value = i;
+                    option.text = array[i];
+                    selectList.appendChild(option);
+                }
+
+                var br = document.createElement("br");
+                threeDeeDiv.appendChild(br);
+
+                //create zoom in
+                var zoomIn = document.createElement("button");
+                zoomIn.id = "zoomIn3d";
+                zoomIn.innerHTML="zoom in";
+                threeDeeDiv.appendChild(zoomIn);
+
+                //create zoom out
+                var zoomOut = document.createElement("button");
+                zoomOut.id = "zoomOut3d";
+                zoomOut.innerHTML="zoom out";
+                threeDeeDiv.appendChild(zoomOut);
+
+                //create move3d
+                var move = document.createElement("button");
+                move.id = "move3d";
+                move.innerHTML="move 3d";
+                threeDeeDiv.appendChild(move);
+
+                //create rotatex
+                var rotaX = document.createElement("button");
+                rotaX.id = "rotaX";
+                rotaX.innerHTML="rotate x";
+                threeDeeDiv.appendChild(rotaX);
+
+                //create rotatey
+                var rotaY = document.createElement("button");
+                rotaY.id = "rotaY";
+                rotaY.innerHTML="rotate y";
+                threeDeeDiv.appendChild(rotaY);
+
+                //create rotatez
+                var rotaZ = document.createElement("button");
+                rotaZ.id = "rotaZ";
+                rotaZ.innerHTML="rotate z";
+                threeDeeDiv.appendChild(rotaZ);
+
+                //create line break
+                threeDeeDiv.appendChild(br);
+
+                //Create input for functions
+                var threeDeeLabel = document.createElement("label");
+                var inputArea = document.createElement("input");
+                threeDeeLabel.innerHTML="X: ";
+                inputArea.id = "threeDeeInputX";
+                threeDeeDiv.appendChild(threeDeeLabel);
+                threeDeeLabel.appendChild(inputArea);
+                var threeDeeLabel2 = document.createElement("label");
+                var inputArea2 = document.createElement("input");
+                threeDeeLabel2.innerHTML="Y: ";
+                inputArea2.id = "threeDeeInputY";
+                threeDeeDiv.appendChild(threeDeeLabel2);
+                threeDeeLabel2.appendChild(inputArea2);
+                var threeDeeLabel3 = document.createElement("label");
+                var inputArea3 = document.createElement("input");
+                threeDeeLabel3.innerHTML="Z: ";
+                inputArea3.id = "threeDeeInputZ";
+                threeDeeDiv.appendChild(threeDeeLabel3);
+                threeDeeLabel3.appendChild(inputArea3);
+
+                isThreeDeeMenuExist=true;
+
+                //after creating the menu, adding an event listener for the option list
+                selectList.addEventListener("change",checkChosenFuncThreeDee);
+
+                //buttons vars and event listeners
+                var zoomIn3d = document.querySelector('#zoomIn3d');
+                zoomIn3d.addEventListener("click",zoomInThreeD);
+                var zoomOut3d = document.querySelector('#zoomOut3d');
+                zoomOut3d.addEventListener("click",zoomOutThreeD);
+                var move3d = document.querySelector('#move3d');
+                move3d.addEventListener("click",moveThreeD);
+                var rotateX = document.querySelector('#rotaX');
+                rotateX.addEventListener("click",rotateThreeDeeX);
+                var rotateY = document.querySelector('#rotaY');
+                rotateY.addEventListener("click",rotateThreeDeeY);
+                var rotateZ = document.querySelector('#rotaZ');
+                rotateZ.addEventListener("click",rotateThreeDeeZ);
+
+                //create event listener for threeDee inputs
+                var threeDeeInputX = document.querySelector('#threeDeeInputX');
+                threeDeeInputX.addEventListener("change",updateThreeDeeInputX);
+                var threeDeeInputY = document.querySelector('#threeDeeInputY');
+                threeDeeInputY.addEventListener("change",updateThreeDeeInputY);
+                var threeDeeInputZ = document.querySelector('#threeDeeInputZ');
+                threeDeeInputZ.addEventListener("change",updateThreeDeeInputZ);
+            }
+        }
+
+        /*  3D json file functions */
+        function checkChosenFuncThreeDee(){
+            var func3 = threeDeeOptions.options[threeDeeOptions.selectedIndex].value;
+            //console.log("function: " + func2);
+            switch(func3) {
+                case "0":
+                    console.log("please choose a function");
+                    break;
+                case "1":
+                    perspective();
+                    sortPolyZ();
+                    printThreeDee();
+                    projectionNum = 0;
+                    break;
+                case "2":
+                    parallel();
+                    sortPolyZ();
+                    printThreeDee();
+                    projectionNum = 3;
+                    break;
+                case "3":
+                    cabinet();
+                    sortPolyZ();
+                    printThreeDee();
+                    projectionNum = 2;
+                    break;
+                case "4":
+                    cavalier();
+                    sortPolyZ();
+                    printThreeDee();
+                    projectionNum = 1;
+                    break;
+            }
+        }
+
+        /* update 3d input x */
+        function updateThreeDeeInputX() {
+            threeDeeInputX = threeDeeInputX.value;
+        }
+
+        /* update 3d input y */
+        function updateThreeDeeInputY() {
+            threeDeeInputY = threeDeeInputY.value;
+        }
+
+        /* update 3d input z */
+        function updateThreeDeeInputZ() {
+            threeDeeInputZ = threeDeeInputZ.value;
+        }
+
+        /* load 3D json into an array */
+        function loadThreeDee(){
+            fetchJSONFile('includes/threeDee.json',function (data) {
+                if(data.polygon !== undefined) {
+                    for(var i=0; i<data.polygon.length; i++) {
+                        threeDeePic[i] = [];
+                        for(var k=0; k<data.polygon[i].length; k++) {
+                            threeDeePic[i][k]= data.polygon[i][k];
+                        }
+                        for(var j=0; j<5; j++) {
+                            threeDeePic[i][threeDeePic[i].length]=0;
+                        }
+                    }
+                }
+                polyNormal();
+                polyMaxZ();
+            });
+        }
+
+        /* calculate the normal for each polygon */
+        function polyNormal() {
+            for(var i=0; i<threeDeePic.length;i++) {
+                var vector1 = [];
+                var vector2 = [];
+                for(var k=0;k<3;k++) {
+                    vector1[k] = threeDeePic[i][k+3]-threeDeePic[i][k];
+                    vector2[k] = threeDeePic[i][k+6]-threeDeePic[i][k+3];
+                }
+                threeDeePic[i][threeDeePic[i].length-3] = vector1[1]*vector2[2]-vector1[2]*vector2[1];
+                threeDeePic[i][threeDeePic[i].length-2] = vector1[2]*vector2[0]-vector1[0]*vector2[2];
+                threeDeePic[i][threeDeePic[i].length-1] = vector1[0]*vector2[1]-vector1[1]*vector2[0];
+            }
+        }
+
+        /* find the max z */
+        function polyMaxZ() {
+            for(var i=0; i<threeDeePic.length;i++) {
+                threeDeePic[i][threeDeePic[i].length-5] = Number.MIN_VALUE;
+                for (var k=2; k<threeDeePic[i].length-6; k+=3) {
+                    if (threeDeePic[i][threeDeePic[i].length-5] < threeDeePic[i][k]) {
+                        threeDeePic[i][threeDeePic[i].length-5] = threeDeePic[i][k];
+                    }
+                }
+            }
+        }
+
+        /* perspective projection */
+        function perspective() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            //copy to poly working array
+            for(var j=0; j<threeDeePic.length; j++) {
+                polyArr[j] = [];
+                for(var t=0; t<threeDeePic[j].length; t++) {
+                    polyArr[j][t] = threeDeePic[j][t];
+                }
+            }
+            //calculation
+            for (var i=0;i<polyArr.length;i++){
+                for (var k=0;k<polyArr[i].length-7;k+=3){
+                    polyArr[i][k] = (polyArr[i][k])/(1+polyArr[i][k+2]/600);
+                    polyArr[i][k+1] = (polyArr[i][k+1])/(1+polyArr[i][k+2]/600);
+                }
+            }
+        }
+
+        /* parallel projection */
+        function parallel() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            //copy to poly working array
+            for(var j=0; j<threeDeePic.length; j++) {
+                polyArr[j] = [];
+                for(var t=0; t<threeDeePic[j].length; t++) {
+                    polyArr[j][t] = threeDeePic[j][t];
+                }
+            }
+            //calculation
+            for(var i=0;i<polyArr.length;i++) {
+                for (var k=0;k<polyArr[i].length-7;k+=3) {
+                    polyArr[i][k] = polyArr[i][k];
+                    polyArr[i][k+1] = polyArr[i][k+1];
+                }
+            }
+        }
+
+        /* cabinet projection */
+        function cabinet() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.globalAlpha = 1;
+            //copy to poly working array
+            for(var j=0; j<threeDeePic.length; j++) {
+                polyArr[j] = [];
+                for(var t=0; t<threeDeePic[j].length; t++) {
+                    polyArr[j][t] = threeDeePic[j][t];
+                }
+            }
+            //calculation
+            var angle;
+            angle = cavalierAndCabinetDeg === undefined ? angle = 45 : angle = cavalierAndCabinetDeg;
+            var angleX = Math.cos(-angle*Math.PI/180);
+            var angleY = Math.sin(-angle*Math.PI/180);
+            for (var i=0;i<polyArr.length;i++) {
+                for (var k=0;k<polyArr[i].length-7;k+=3){
+                    polyArr[i][k] = (polyArr[i][k])+(polyArr[i][k+2]/2*angleX);
+                    polyArr[i][k+1] = (polyArr[i][k+1])+(polyArr[i][k+2]/2*angleY);
+                }
+            }
+        }
+
+        /* cavalier projection */
+        function cavalier() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.globalAlpha = 1;
+            //copy to poly working array
+            for(var j=0; j<threeDeePic.length; j++) {
+                polyArr[j] = [];
+                for(var t=0; t<threeDeePic[j].length; t++) {
+                    polyArr[j][t] = threeDeePic[j][t];
+                }
+            }
+            //calculation
+            var angle;
+            angle = cavalierAndCabinetDeg === undefined ? angle = 45 : angle = cavalierAndCabinetDeg;
+            var angleX = Math.cos(-angle*Math.PI/180);
+            var angleY = Math.sin(-angle*Math.PI/180);
+            for (var i=0;i<polyArr.length;i++) {
+                for (var k=0;k<polyArr[i].length-7;k+=3){
+                    polyArr[i][k] = (polyArr[i][k])+(polyArr[i][k+2]*angleX);
+                    polyArr[i][k+1] = (polyArr[i][k+1])+(polyArr[i][k+2]*angleY);
+                }
+            }
+        }
+
+        /* zoom out multiply */
+        function zoomOutThreeD(){
+            Resize3D(0.9);
+        }
+
+        /* zoom in multiply */
+        function zoomInThreeD(){
+            Resize3D(1.1);
+        }
+
+        /* zoom function */
+        function Resize3D(zoomIndex){
+            var Zoom3d = zoomIndex;
+            for(var i=0; i<threeDeePic.length;i++) {
+                for(var k=0;k<threeDeePic[i].length-7;k+=3) {
+                    threeDeePic[i][k] = threeDeePic[i][k]*Zoom3d;
+                    threeDeePic[i][k+1] = threeDeePic[i][k+1]*Zoom3d;
+                    threeDeePic[i][k+2] = threeDeePic[i][k+2]*Zoom3d;
+                }
+            }
+            polyNormal();
+            polyMaxZ();
+            checkProjection();
+        }
+
+        /* moving objects on the grid */
+        function moveThreeD(){
+            for(var i=0; i<threeDeePic.length;i++) {
+                for(var k=0; k<threeDeePic[i].length-7; k+=3) {
+                    threeDeePic[i][k] = threeDeePic[i][k]+parseFloat(threeDeeInputX);
+                    threeDeePic[i][k+1] = threeDeePic[i][k+1]+parseFloat(threeDeeInputY);
+                    threeDeePic[i][k+2] = threeDeePic[i][k+2]+parseFloat(threeDeeInputZ);
+                }
+            }
+            polyNormal();
+            checkProjection();
+        }
+
+        /* rotate3d X */
+        function rotateThreeDeeX() {
+            var userDeg;
+            if(threeDeeInputX === undefined || threeDeeInputX === 0) {
+                userDeg = 5;
+            } else {
+                userDeg = threeDeeInputX;
+            }
+            var rotY = 0;
+            var rotZ = 0;
+            for(var i=0; i<threeDeePic.length;i++) {
+                for(var k=0;k<threeDeePic[i].length-7;k+=3) {
+                    rotY = threeDeePic[i][k+1];
+                    rotZ = threeDeePic[i][k+2];
+                    threeDeePic[i][k+1] = rotY*Math.cos(userDeg*Math.PI/180)+rotZ*(-1*Math.sin(userDeg*Math.PI/180));
+                    threeDeePic[i][k+2] = rotY*Math.sin(userDeg*Math.PI/180)+rotZ*Math.cos(userDeg*Math.PI/180);
+                }
+                rotY = threeDeePic[i][threeDeePic[i].length-2];
+                rotZ = threeDeePic[i][threeDeePic[i].length-1];
+                // Y normal rotation
+                threeDeePic[i][threeDeePic[i].length-2] = rotY*Math.cos(userDeg*Math.PI/180)+rotZ*(-1*Math.sin(userDeg*Math.PI/180));
+                // Z normal rotation
+                threeDeePic[i][threeDeePic[i].length-1] = rotY*Math.sin(userDeg*Math.PI/180)+rotZ*Math.cos(userDeg*Math.PI/180);
+            }
+
+            polyMaxZ();
+            checkProjection();
+        }
+
+        /* rotate3d Y */
+        function rotateThreeDeeY() {
+            var userDeg;
+            if(threeDeeInputY === undefined || threeDeeInputY === 0) {
+                userDeg = 5;
+            } else {
+                userDeg = threeDeeInputY;
+            }
+            var rotX = 0;
+            var rotZ = 0;
+            for(var i=0; i<threeDeePic.length;i++) {
+                for(var k=0;k<threeDeePic[i].length-7;k+=3) {
+                    rotX = threeDeePic[i][k];
+                    rotZ = threeDeePic[i][k+2];
+                    threeDeePic[i][k] = rotX*Math.cos(AngleRotXUser*Math.PI/180)+rotZ*(-1*Math.sin(AngleRotXUser*Math.PI/180));
+                    threeDeePic[i][k+2] = rotX*Math.sin(AngleRotXUser*Math.PI/180)+rotZ*Math.cos(AngleRotXUser*Math.PI/180);
+                }
+                rotX = threeDeePic[i][threeDeePic[i].length-3];
+                rotZ = threeDeePic[i][threeDeePic[i].length-1];
+                // X normal rotation
+                threeDeePic[i][threeDeePic[i].length-3] = rotX*Math.cos(userDeg*Math.PI/180)+rotZ*(-1*Math.sin(userDeg*Math.PI/180));
+                // Z normal rotation
+                threeDeePic[i][threeDeePic[i].length-1] = rotX*Math.sin(userDeg*Math.PI/180)+rotZ*Math.cos(userDeg*Math.PI/180);
+            }
+
+            polyMaxZ();
+            checkProjection();
+        }
+
+        /* rotate3d Z */
+        function rotateThreeDeeZ() {
+            var userDeg;
+            if(threeDeeInputZ === undefined || threeDeeInputZ === 0) {
+                userDeg = 5;
+            } else {
+                userDeg = threeDeeInputZ;
+            }
+            var rotX = 0;
+            var rotY = 0;
+            for(var i=0; i<threeDeePic.length;i++)
+            {
+                for(var k=0;k<threeDeePic[i].length-7;k+=3)
+                {
+                    rotX = threeDeePic[i][k];
+                    rotY = threeDeePic[i][k+1];
+                    threeDeePic[i][k] = rotX*Math.cos(AngleRotXUser*Math.PI/180)+rotY*Math.sin(AngleRotXUser*Math.PI/180);
+                    threeDeePic[i][k+1] = rotX*(-1*Math.sin(AngleRotXUser*Math.PI/180))+rotY*Math.cos(AngleRotXUser*Math.PI/180);
+                }
+                rotX = threeDeePic[i][threeDeePic[i].length-3];
+                rotY = threeDeePic[i][threeDeePic[i].length-2];
+                // X normal rotation
+                threeDeePic[i][threeDeePic[i].length-3] = rotX*Math.cos(userDeg*Math.PI/180)+rotY*Math.sin(userDeg*Math.PI/180);
+                // Y normal rotation
+                threeDeePic[i][threeDeePic[i].length-2] = rotX*(-1*Math.sin(userDeg*Math.PI/180))+rotY*Math.cos(userDeg*Math.PI/180);			          		
+            }
+
+            polyMaxZ();
+            checkProjection();
+        }
+
+        /* check in which projection to display the functions */
+        function checkProjection(){
+            if (projectionNum === 1) {
+                cavalier();
+            } else if(projectionNum === 2) {
+                cabinet();
+            } else if(projectionNum === 3) {
+                parallel();
+            } else {
+                perspective();
+            }
+            sortPolyZ();
+            printThreeDee();
+        }
+
+        /* sorting polygons by their max Z */
+        function sortPolyZ() {
+            for (var i=0;i<polyArr.length-1;i++) {
+                for (var j=0;j<polyArr.length-i-1;j++) {
+                    if(polyArr[j][polyArr[j].length-5] < polyArr[j+1][polyArr[j].length-5]) {
+                        //if the arrays lengths are equal
+                        if (polyArr[j].length === polyArr[j+1].length) {
+                            for(var k=0;k<polyArr[j].length;k++) {
+                                sortZArr[k] = polyArr[j][k];
+                                polyArr[j][k] = polyArr[j+1][k];
+                                polyArr[j+1][k] = sortZArr[k];
+                            }
+                        } else {
+                            var temp1 = [];
+                            var temp2 = [];
+                            for(var s1=0;s1<polyArr[j].length;s1++) {
+                                temp1[s1] = polyArr[j][s1];
+                            }
+                            for(var s2=0;s2<polyArr[j+1].length;s2++) {
+                                temp2[s2] = polyArr[j+1][s2];
+                            }
+                            polyArr[j] = [];
+                            polyArr[j+1] = [];
+                            for(var s3=0;s3<temp2.length;s3++) {
+                                polyArr[j][s3] = temp2[s3];
+                            }
+                            for(var s4=0;s4<temp1.length;s4++) {
+                                polyArr[j+1][s4] = temp1[s4];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /* print 3D objects to the screen */
+        function printThreeDee(){
+            console.log("printThreeDee");
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 1;
+            visiblePoly();
+            for (var i=0;i<polyArr.length;i++){
+                if(polyArr[i][polyArr[i].length-4] === 1) {
+                    var k = 3;
+                    ctx.beginPath();   //first point of polygon
+                    ctx.moveTo(polyArr[i][0]+canvasWidth/2, polyArr[i][1]+canvasWidth/2);
+                    while(k<polyArr[i].length-7) {
+                        ctx.lineTo(polyArr[i][k]+canvasWidth/2, polyArr[i][k+1]+canvasWidth/2);
+                        k += 3;
+                    }
+                    ctx.closePath();
+                    ctx.globalAlpha = 1;
+                    ctx.stroke();
+                    ctx.globalAlpha = opacity;
+                    ctx.fillStyle = polyArr[i][polyArr[i].length-6];
+                    ctx.fill();
+                }
+            }
+        }
+
+        /* function to checks which polygon will be displayed */
+        function visiblePoly() {
+            var normalX = 0;
+            var normalY = 0;
+            var normalZ = 0;
+            var vectorX = 0;
+            var vectorY = 0;
+            var vectorZ = 0;
+            var visiPol = 0;
+            var normalUserDeg = 0;
+            var angle;
+            angle = cavalierAndCabinetDeg === undefined ? angle = 45 : angle = cavalierAndCabinetDeg;
+            var angleX = Math.cos(-angle*Math.PI/180);
+            var angleY = Math.sin(-angle*Math.PI/180);
+            var xtovec = 0;
+            var ytovec = 0;
+            var ztovec = 0;
+            // cavalier projection
+            if (projectionNum === 1) {
+                xtovec = 5000*angleX;
+                ytovec = 5000*angleY;
+                ztovec = 5000;
+            }
+            // cabinet projection
+            else if(projectionNum === 2) {
+                xtovec = 5000/2*angleX;
+                ytovec = 5000/2*angleY;
+                ztovec = 5000;
+            }
+            //not caval & not cabinet
+            else {
+                xtovec = 0;
+                ytovec = 0;
+                ztovec = 800;
+            }
+            //check the angle between C.O.P & Polygon Normal
+            for(var i=0; i<polyArr.length;i++) {
+                normalX = polyArr[i][polyArr[i].length-3];
+                normalY = polyArr[i][polyArr[i].length-2];
+                normalZ = polyArr[i][polyArr[i].length-1];
+                vectorX = polyArr[i][0]-(xtovec);
+                vectorY = polyArr[i][1]-(ytovec);
+                vectorZ = polyArr[i][2]-(-ztovec);
+
+                visiPol = Math.acos((vectorX*normalX+vectorY*normalY+vectorZ*normalZ)/(Math.sqrt(Math.pow(vectorX,2)+
+                        Math.pow(vectorY,2)+Math.pow(vectorZ,2))*Math.sqrt(Math.pow(normalX,2)+
+                        Math.pow(normalY,2)+Math.pow(normalZ,2)))); // calc angle between normal and C.O.P
+                normalUserDeg = visiPol*(180/Math.PI); // from rad to deg
+                //works with opacity
+                if(opacity!==undefined && opacity<1 && opacity>=0) {
+                    polyArr[i][polyArr[i].length-4]=1;
+                } else if(Math.cos(normalUserDeg*(Math.PI/180))<0) {
+                    polyArr[i][polyArr[i].length-4] = 1;
+                } else{
+                    polyArr[i][polyArr[i].length-4] = 0;
+                }
+            }
+        }
+
     </script>
 </body>
 </html>
