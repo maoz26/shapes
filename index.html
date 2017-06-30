@@ -67,7 +67,9 @@
         <p><b>First load the 3d objects<br>after that, choose the projection you which to use for viewing.</b></p>
         <p>1. For zoom in/out, press the zoom in button.</p>
         <p>2. For moving the objects in one of the axis choose a number positive or negative.</p>
-        <p>3. For rotating the objects, click the axis rotation button.</p>
+        <p>3. For rotating the objects, click the axis rotation button.</p><br>
+        <p>** the default degree for cavalier and cabal is 45. there is another input to change it.</p>
+        <p> if you wish to change it, put a number and then choose the projection.</p>
     </div>
     <div id="fade" class="black_overlay"></div>
 
@@ -729,11 +731,11 @@
         var polyArr = [];
         var sortZArr = [];
         var opacity = 1;
-        var cavalierAndCabinetDeg;
         var projectionNum = 0;
         var threeDeeX = 0;
         var threeDeeY = 0;
         var threeDeeZ = 0;
+        var threeDeeCabCav = 45;
 
         /* EX3 listeners */
         threeDeeButton.addEventListener("click",loadThreeDeePackage);
@@ -772,6 +774,14 @@
                     option.text = array[i];
                     selectList.appendChild(option);
                 }
+
+                //input for cabin and cabal projections
+                var threeDeeCabCavLabel = document.createElement("label");
+                var inputAreaCabCav = document.createElement("input");
+                threeDeeCabCavLabel.innerHTML="Cabinet/Cavalier Degree: ";
+                inputAreaCabCav.id = "cabinAndCaval";
+                threeDeeDiv.appendChild(threeDeeCabCavLabel);
+                threeDeeCabCavLabel.appendChild(inputAreaCabCav);
 
                 var br = document.createElement("br");
                 threeDeeDiv.appendChild(br);
@@ -861,6 +871,8 @@
                 threeDeeInputY.addEventListener("change",updateThreeDeeInputY);
                 var threeDeeInputZ = document.querySelector('#threeDeeInputZ');
                 threeDeeInputZ.addEventListener("change",updateThreeDeeInputZ);
+                var cabinAndCaval = document.querySelector('#cabinAndCaval');
+                cabinAndCaval.addEventListener("change",updateCabinCabal);
             }
         }
 
@@ -877,6 +889,11 @@
         /* update 3d input z */
         function updateThreeDeeInputZ() {
             threeDeeZ = threeDeeInputZ.value;
+        }
+
+        /* update cabin and cabal input z */
+        function updateCabinCabal() {
+            threeDeeCabCav = cabinAndCaval.value;
         }
 
         /*  3D json file functions */
@@ -1019,8 +1036,8 @@
                 }
             }
             //calculation
-            var angle;
-            angle = cavalierAndCabinetDeg === undefined ? angle = 45 : angle = cavalierAndCabinetDeg;
+            var angle = threeDeeCabCav;
+            if (angle === "" || angle === undefined) angle = 45;
             var angleX = Math.cos(-angle*Math.PI/180);
             var angleY = Math.sin(-angle*Math.PI/180);
             for (var i=0;i<polyArr.length;i++) {
@@ -1044,8 +1061,8 @@
                 }
             }
             //calculation
-            var angle;
-            angle = cavalierAndCabinetDeg === undefined ? angle = 45 : angle = cavalierAndCabinetDeg;
+            var angle = threeDeeCabCav;
+            if (angle === "" || angle === undefined) angle = 45;
             var angleX = Math.cos(-angle*Math.PI/180);
             var angleY = Math.sin(-angle*Math.PI/180);
             for (var i=0;i<polyArr.length;i++) {
@@ -1083,6 +1100,9 @@
 
         /* moving objects on the grid */
         function moveThreeD(){
+            if (threeDeeX === undefined || threeDeeX === "") threeDeeX=0;
+            if (threeDeeY === undefined || threeDeeY === "") threeDeeY=0;
+            if (threeDeeZ === undefined || threeDeeZ === "") threeDeeZ=0;
             for(var i=0; i<threeDeePic.length;i++) {
                 for(var k=0; k<threeDeePic[i].length-7; k+=3) {
                     threeDeePic[i][k] = threeDeePic[i][k]+parseFloat(threeDeeX);
@@ -1228,8 +1248,8 @@
             var vectorZ = 0;
             var visiPol = 0;
             var normalUserDeg = 0;
-            var angle;
-            angle = cavalierAndCabinetDeg === undefined ? angle = 45 : angle = cavalierAndCabinetDeg;
+            var angle = threeDeeCabCav;
+            if (angle === "" || angle === undefined) angle = 45;
             var angleX = Math.cos(-angle*Math.PI/180);
             var angleY = Math.sin(-angle*Math.PI/180);
             var xtovec = 0;

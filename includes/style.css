@@ -80,8 +80,9 @@ select{
 .textRight {
     float: right;
 }
-#threeDeeOptions{
-    margin-bottom: 30px;
+#cabinAndCaval{
+    margin-bottom: 15px;
+    margin-top: 15px;
 }
 #threeDeeInputX{
     margin-top: 15px;
