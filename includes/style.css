@@ -80,3 +80,9 @@ select{
 .textRight {
     float: right;
 }
+#threeDeeOptions{
+    margin-bottom: 30px;
+}
+#threeDeeInputX{
+    margin-top: 15px;
+}
